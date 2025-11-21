@@ -68,7 +68,6 @@ alias '.3'='cd ../../..'
 alias '.4'='cd ../../../..'
 alias '.5'='cd ../../../../..'
 alias ..='cd ..'
-alias kube=kube.fzf
 alias l='ls -lh'
 alias la='ls -A'
 alias ll='ls -lh'
@@ -212,6 +211,7 @@ if type jq &> /dev/null; then
 fi
 
 if type kubectl &> /dev/null; then
+    alias kube=kube.fzf
     if [[ -n ${BASH_VERSION} ]]; then
         source <(kubectl completion bash)
     elif [[ -n ${ZSH_VERSION} ]]; then
