@@ -22,6 +22,7 @@ if filereadable(glob("~/.local/share/nvim/site/autoload/plug.vim"))
   Plug 'junegunn/fzf.vim'
   " Open fuzzy file finder
   map <Leader>f :FZF<CR>
+  map <Leader>F :FZF ~<CR>
   " Open fuzzy tag finder
   map <Leader>d :Tags<CR>
 
