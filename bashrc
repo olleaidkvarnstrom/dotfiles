@@ -8,7 +8,13 @@
 set +o ignoreeof
 
 ## Add extra paths
-for p in "${HOME}/bin" "${HOME}/.local/bin" "${HOME}/go/bin" "${HOME}/.rd/bin"; do
+for p in \
+    "${HOME}/.local/bin" \
+    "${HOME}/.rd/bin" \
+    "${HOME}/bin" \
+    "${HOME}/dotfiles/bin" \
+    "${HOME}/go/bin"
+do
     if [[ -d "${p}" && ${PATH} != *"${p}"* ]]; then
         export PATH="${p}:${PATH}"
     fi
@@ -56,10 +62,17 @@ case $(uname) in
         ;;
 esac
 
+alias '.1'='cd ..'
+alias '.2'='cd ../..'
+alias '.3'='cd ../../..'
+alias '.4'='cd ../../../..'
+alias '.5'='cd ../../../../..'
 alias ..='cd ..'
+alias kube=kube.fzf
 alias l='ls -lh'
 alias la='ls -A'
 alias ll='ls -lh'
+alias rg=rg.fzf
 
 isempty() { (shopt -s nullglob dotglob; f=(${1}/*); ((! ${#f[@]}))); }
 retry() { while ! "${@}"; do sleep 1; done; }
@@ -72,25 +85,24 @@ man() {
         LESS_TERMCAP_us=$'\E[04;38;5;146m' \
         man "${@}"
 }
+maybe_source() {
+    if [[ -f "$1" ]]; then
+        source "$1"
+    fi
+}
+
+
+maybe_source "$HOME/dotfiles/scripts/z.sh"
+maybe_source "$HOME/dotfiles/scripts/fzf-git.sh"
+maybe_source "$HOME/dotfiles/bashrc.local"
 
 ## Extra files to exec
 if [[ -n ${BASH_VERSION} ]]; then
-    o_reset_bash_ps1() {
-        local host="$(hostname -f 2>/dev/null || hostname)"
-        local line1="\[\033[0;31m\]${host} \[\033[0;34m\][\w]\[\033[0m\]"
-        local line2="\$ "
-        PS1="${line1}"$'\n'"${line2}"
-    }
-    o_reset_bash_ps1
-    unset o_reset_bash_ps1
-
-    [[ -f /etc/bash_completion ]] && source '/etc/bash_completion'
-
-    ## Prevent escaping dollar sign in tab completion
-    shopt -s direxpand
-
-    ## Allow recursive globbing with **
-    shopt -s globstar
+    maybe_source "/etc/bash_completion"
+    maybe_source "$HOME/dotfiles/scripts/bash_ps1.sh"
+    
+    shopt -s direxpand ## Prevent escaping dollar sign in tab completion
+    shopt -s globstar  ## Allow recursive globbing with **
 fi
 
 ## LOCALE
@@ -144,11 +156,9 @@ o_init_stty_settings() {
 o_init_stty_settings
 unset o_init_stty_settings
 
-## Special application settings
-
-if type as &> /dev/null; then
-    asm() { as -o "${1%.*}.o" "${1}" && ld -o "${1%.*}" "${1%.*}.o"; }
-fi
+##################################
+## Special application settings ##
+##################################
 
 if type clang &> /dev/null; then
     alias clang='clang -Weverything -Werror'
@@ -164,6 +174,14 @@ if type delta &> /dev/null; then
     export DELTA_FEATURES="+side-by-side hyperlinks"
 fi
 
+if type fzf &> /dev/null; then
+    if [[ -n ${BASH_VERSION} ]]; then
+        eval "$(fzf --bash)"
+    elif [[ -n ${ZSH_VERSION} ]]; then
+        source <(fzf --zsh)
+    fi
+fi
+
 if type g++ &> /dev/null; then
     alias g++='g++ -Wall -Wextra -Werror -pedantic -Weffc++'
     alias g++99='g++ -std=c++99'
@@ -175,10 +193,6 @@ if type gcc &> /dev/null; then
     alias gcc89='gcc -std=c89'
     alias gcc99='gcc -std=c99'
     alias gcc11='gcc -std=c11'
-fi
-
-if type ghc &> /dev/null; then
-    alias ghc='ghc --make -Wall'
 fi
 
 if type git &> /dev/null; then
@@ -205,26 +219,6 @@ if type kubectl &> /dev/null; then
     fi
 fi
 
-if type nasm &> /dev/null; then
-    asm32() { nasm -f elf32 "${1}" && ld -m elf_i386 -o "${1%.*}" "${1%.*}.o"; }
-fi
-
 if type nix &> /dev/null; then
-    if [ -e '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh' ]; then
-        . '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh'
-    fi
-fi
-
-if type pacman &> /dev/null; then
-    alias pacman='pacman --color=auto'
-fi
-
-alias '.1'='cd ..'
-alias '.2'='cd ../..'
-alias '.3'='cd ../../..'
-alias '.4'='cd ../../../..'
-alias '.5'='cd ../../../../..'
-
-if [[ -f "$HOME/dotfiles/bashrc.local" ]]; then
-    source "$HOME/dotfiles/bashrc.local"
+    maybe_source '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh'
 fi
