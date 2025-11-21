@@ -19,6 +19,7 @@ do
         export PATH="${p}:${PATH}"
     fi
 done
+unset p
 
 export HISTFILE="${HOME}/.histfile"
 export HISTSIZE='10000'
@@ -90,14 +91,26 @@ maybe_source() {
     fi
 }
 
-
 maybe_source "$HOME/dotfiles/scripts/z.sh"
 maybe_source "$HOME/dotfiles/scripts/fzf-git.sh"
 maybe_source "$HOME/dotfiles/bashrc.local"
 
+if [[ -d /etc/profile.d ]]; then
+    for file in /etc/profile.d/*.sh; do
+	source "${file}"
+    done
+    unset file
+fi
+
 ## Extra files to exec
 if [[ -n ${BASH_VERSION} ]]; then
     maybe_source "/etc/bash_completion"
+    if [[ -d /etc/bash_completion.d ]]; then
+	for file in /etc/bash_completion.d/*; do
+	    source "${file}"
+	done
+    fi
+    unset file
     maybe_source "$HOME/dotfiles/scripts/bash_ps1.sh"
     
     shopt -s direxpand ## Prevent escaping dollar sign in tab completion
