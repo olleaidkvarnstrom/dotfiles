@@ -25,6 +25,7 @@ if filereadable(glob("~/.local/share/nvim/site/autoload/plug.vim"))
   map <Leader>F :FZF ~<CR>
   " Open fuzzy tag finder
   map <Leader>d :Tags<CR>
+  map <Leader>r :Rg<CR>
 
   "" NerdTree
   Plug 'preservim/nerdtree'
