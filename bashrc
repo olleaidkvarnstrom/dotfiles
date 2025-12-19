@@ -63,18 +63,14 @@ case $(uname) in
         ;;
 esac
 
-alias '.1'='cd ..'
-alias '.2'='cd ../..'
-alias '.3'='cd ../../..'
-alias '.4'='cd ../../../..'
-alias '.5'='cd ../../../../..'
 alias ..='cd ..'
+alias ...='cd ../..'
+alias ....='cd ../../..'
+alias .....='cd ../../../..'
 alias l='ls -lh'
 alias la='ls -A'
 alias ll='ls -lh'
-alias rg=rg.fzf
 
-isempty() { (shopt -s nullglob dotglob; f=(${1}/*); ((! ${#f[@]}))); }
 retry() { while ! "${@}"; do sleep 1; done; }
 man() {
     env LESS_TERMCAP_mb=$'\E[01;31m' \
@@ -92,7 +88,6 @@ maybe_source() {
 }
 
 maybe_source "$HOME/dotfiles/scripts/z.sh"
-maybe_source "$HOME/dotfiles/scripts/fzf-git.sh"
 maybe_source "$HOME/dotfiles/bashrc.local"
 
 if [[ -d /etc/profile.d ]]; then
@@ -208,6 +203,7 @@ if type gcc &> /dev/null; then
 fi
 
 if type git &> /dev/null; then
+    maybe_source "$HOME/dotfiles/scripts/fzf-git.sh"
     alias s='git status -bs'
 fi
 
@@ -224,16 +220,12 @@ if type jq &> /dev/null; then
 fi
 
 if type kubectl &> /dev/null; then
-    alias kube=kube.fzf
+    alias kz=kube.fzf
     if [[ -n ${BASH_VERSION} ]]; then
         source <(kubectl completion bash)
     elif [[ -n ${ZSH_VERSION} ]]; then
         source <(kubectl completion zsh)
     fi
-fi
-
-if type nix &> /dev/null; then
-    maybe_source '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh'
 fi
 
 if type pyenv &> /dev/null; then
@@ -244,4 +236,8 @@ if type pyenv &> /dev/null; then
     elif [[ -n ${ZSH_VERSION} ]]; then
         eval "$(pyenv init - zsh)"
     fi
+fi
+
+if type rg &> /dev/null; then
+    alias rz=rg.fzf
 fi
